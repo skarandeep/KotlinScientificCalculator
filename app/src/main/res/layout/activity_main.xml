@@ -25,12 +25,13 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <EditText
+        <TextView
+            android:id="@+id/outputView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:fontFamily="@font/meera_inimai"
             android:hint="@string/result"
-            android:text="input values"
+            android:text="Press AC     "
             android:textAlignment="textEnd"
             android:textColor="@color/white"
             android:textIsSelectable="true"
@@ -59,7 +60,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toTopOf="@id/numpad">
 
-        <EditText
+        <TextView
+            android:id="@+id/inputView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:fontFamily="@font/meera_inimai"
@@ -68,7 +70,7 @@
             android:textColor="@color/white"
             android:textIsSelectable="true"
             android:textSize="50sp"
-            android:text="@string/to_start"
+            android:text="to start      "
             android:textStyle="normal"
             android:inputType="text"
             tools:ignore="MissingConstraints" />
@@ -99,7 +101,7 @@
             android:weightSum="4">
 
             <Button
-                android:id="@+id/button_ac"
+                android:id="@+id/button_allclear"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="3dp"
@@ -137,6 +139,7 @@
                 android:text=")"
                 android:layout_weight="1"
                 />
+
 
         </LinearLayout>
 
@@ -208,7 +211,7 @@
             android:weightSum="5">
 
             <Button
-                android:id="@+id/button_x"
+                android:id="@+id/button_factorial"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="3dp"
@@ -218,12 +221,12 @@
                 />
 
             <Button
-                android:id="@+id/button_x2"
+                android:id="@+id/button_square"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="3dp"
                 android:background="@drawable/button_background"
-                android:text="x2"
+                android:text="x⌃2"
                 android:layout_weight="1"
                 />
 
@@ -233,12 +236,12 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="3dp"
                 android:background="@drawable/button_background"
-                android:text="sqrt"
+                android:text="√"
                 android:layout_weight="1"
                 />
 
             <Button
-                android:id="@+id/button_div_x"
+                android:id="@+id/button_divby_x"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="3dp"
@@ -253,7 +256,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="3dp"
                 android:background="@drawable/button_background"
-                android:text="div"
+                android:text="÷"
                 android:layout_weight="1"
                 />
 
@@ -267,7 +270,7 @@
             android:weightSum="4">
 
             <Button
-                android:id="@+id/seven"
+                android:id="@+id/button_seven"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="3dp"
@@ -416,12 +419,12 @@
             android:weightSum="4">
 
             <Button
-                android:id="@+id/button_n"
+                android:id="@+id/button_pie"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="3dp"
                 android:background="@drawable/button_background"
-                android:text="n"
+                android:text="π"
                 android:layout_weight="1"
                 />
 

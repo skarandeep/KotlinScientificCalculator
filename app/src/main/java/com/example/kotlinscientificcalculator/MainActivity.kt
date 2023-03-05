@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.kotlinscientificcalculator.databinding.ActivityMainBinding
-import kotlin.math.sqrt
+import kotlin.math.*
 
 class MainActivity : AppCompatActivity() {
     lateinit var binding: ActivityMainBinding
@@ -55,20 +55,19 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.buttonMinus.setOnClickListener {
-//            binding.inputView.append("-")
             val str = binding.inputView.toString()
             //checking if user already entered '-' symbol, not allowing user to add '-' symbol again
             if (!str.get(index = str.length - 1).equals("-")) {
-                binding.inputView.text = (binding.inputView.text.toString() + "-")
+                binding.inputView.append("-")
             }
         }
 
         binding.buttonMultiply.setOnClickListener {
-            binding.inputView.append("*")
             val str = binding.inputView.toString()
             //checking if user already entered '*' symbol
             if (!str.get(index = str.length - 1).equals("*")) {
-                binding.inputView.text = (binding.inputView.toString() + "*")
+                binding.inputView.append("*")
+//                binding.inputView.text = (binding.inputView.toString() + "*")
             }
         }
 
@@ -123,7 +122,7 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, "Enter a valid number", Toast.LENGTH_SHORT)
                     .show()
             } else {
-                binding.inputView.text = "√" + str
+                binding.inputView.text = "sqrt" + str
                 //calculating square root using Kotlin fun
                 var sqroot = sqrt(str.toDouble())
                 binding.outputView.text = sqroot.toString()
@@ -131,10 +130,10 @@ class MainActivity : AppCompatActivity() {
 
 
             binding.buttonSin.setOnClickListener {
-                binding.inputView.append("Sin")
+                binding.inputView.append("sin")
             }
             binding.buttonCos.setOnClickListener {
-                binding.inputView.append("Cos")
+                binding.inputView.append("cos")
             }
             binding.buttonTan.setOnClickListener {
                 binding.inputView.append("tan")
@@ -143,10 +142,10 @@ class MainActivity : AppCompatActivity() {
                 binding.inputView.append("ln")
             }
             binding.buttonLog.setOnClickListener {
-                binding.inputView.append("Log")
+                binding.inputView.append("log")
             }
             binding.buttonPie.setOnClickListener {
-                binding.inputView.append("3.142")
+                binding.inputView.append("3.14159265")
             }
             binding.buttonC.setOnClickListener {
                 var str: String = binding.inputView.text.toString()
@@ -162,30 +161,103 @@ class MainActivity : AppCompatActivity() {
 
             binding.buttonEquals.setOnClickListener {
                 var str: String = binding.inputView.text.toString()
-          //      var result: Double = calculate(str)
-          //      binding.outputView.text = result.toString()
+                var result: Double = calculation(str)
+                binding.outputView.text = result.toString()
                 binding.inputView.text = ""
             }
         }
     }
 
-    fun calculate(str: String) {
-        //   var result =
-        // return object : Any() {
-        var position = -1
-        var char = 0
+    private fun calculation(str: String): Double {
 
-        fun nextChar() {
-            //traversing char by char
-            char = if (++position < str.length) str[position].toInt() else -1
-        }
+        return object : Any() {
+            var position = -1
+            var char = 0
 
-        fun eat(charToEdit: Int): Boolean {
-            //            while (char == ''.toInt().nextChar())
-            //       }
-            //checking extra spacing
-            return true
-        }
+            fun nextChar() {
+                //traversing char by char from input string
+                char = if (++position < str.length) {
+                    //using .code in place of .toInt()
+                    str[position].digitToInt()
+                } else -1
+            }
+
+            fun eat(charToEdit: Int): Boolean {
+                //checking extra spacing
+                while (char == Character.MIN_VALUE.digitToInt()) nextChar()
+
+                if (char == charToEdit) {
+                    nextChar()
+                    return true
+                }
+                return false
+            }
+
+            fun parse(): Double {
+                nextChar()
+                //get the next operator
+                var x = parseExpression()
+                if (position < str.length) throw java.lang.RuntimeException("Unexpected: " + char.toChar())
+                return x
+            }
+
+            fun parseExpression(): Double {
+                //check for addition or subtraction
+                var x = parseTerm()
+                while (true) {
+                    if (eat('+'.digitToInt())) x += parseTerm()
+                    else if (eat('-'.toInt())) x -= parseTerm()
+                    else return x
+                }
+            }
+
+            fun parseTerm(): Double {
+                //check for parse factor
+                var x = parseFactor()
+                while (true) {
+                    if (eat('*'.digitToInt())) x *= parseFactor()
+                    else if (eat('/'.digitToInt())) x /= parseFactor()
+                    else return x
+                }
+            }
+
+            fun parseFactor(): Double {
+                if (eat('+'.digitToInt())) return parseFactor()
+                if (eat('-'.digitToInt())) return -parseFactor()
+                var x: Double
+                var startPosition = position
+                if (eat('('.digitToInt())) {
+                    x = parseExpression()
+                    eat(')'.digitToInt())
+                } else if (char >= '0'.digitToInt() && char <= '9'.digitToInt() || char == '.'.digitToInt()) {
+                    while (char >= '0'.digitToInt() && char <= '9'.digitToInt() || char == '.'.digitToInt()) nextChar()
+                    x = str.substring(startPosition, position).toDouble()
+
+                } else if (char >= 'a'.digitToInt() && char <= 'z'.digitToInt()) {
+                    while(char >='a'.digitToInt() && char<='z'.digitToInt()) nextChar()
+                    var func = str.substring(startPosition, position)
+                    x = parseFactor()
+
+                    x = when (func) {
+                        "sqrt" -> sqrt(x)
+                        "sin" -> sin(Math.toRadians(x))
+                        "cos" -> cos(Math.toRadians(x))
+                        "tan" -> tan(Math.toRadians(x))
+                        "log" -> log10(x)
+                        "ln" -> ln(x)
+                        else ->
+                            throw  RuntimeException(
+                            "Unknown Exception : $func"
+                        )
+                    }
+                }
+                else {
+                    throw RuntimeException("Unexpected : " + char.toChar())
+                }
+                if(eat('⌃'.toInt())) x = Math.pow(x,parseFactor())
+                return x
+            }
+        }.parse()
     }
 
     private fun factorial(num: Int): Long {
@@ -193,11 +265,10 @@ class MainActivity : AppCompatActivity() {
         return if (num >= 1) {
             return num * factorial(num - 1)
         } else {
-                return 1
-            }
+            return 1
         }
     }
-
+}
 
 
 //TODO - animations to button presses

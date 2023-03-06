@@ -127,140 +127,217 @@ class MainActivity : AppCompatActivity() {
                 var sqroot = sqrt(str.toDouble())
                 binding.outputView.text = sqroot.toString()
             }
+        }
 
 
-            binding.buttonSin.setOnClickListener {
-                binding.inputView.append("sin")
-            }
-            binding.buttonCos.setOnClickListener {
-                binding.inputView.append("cos")
-            }
-            binding.buttonTan.setOnClickListener {
-                binding.inputView.append("tan")
-            }
-            binding.buttonLn.setOnClickListener {
-                binding.inputView.append("ln")
-            }
-            binding.buttonLog.setOnClickListener {
-                binding.inputView.append("log")
-            }
-            binding.buttonPie.setOnClickListener {
-                binding.inputView.append("3.14159265")
-            }
-            binding.buttonC.setOnClickListener {
-                var str: String = binding.inputView.text.toString()
-                if (str.isEmpty()) {
-                    Toast.makeText(this, "Please enter a valid number", Toast.LENGTH_SHORT).show()
-                } else {
-                    //dropping the last entered digit
-                    str = str.dropLast(1)
-                    binding.inputView.text = str
-                }
-            }
-
-
-            binding.buttonEquals.setOnClickListener {
-                var str: String = binding.inputView.text.toString()
-                var result: Double = calculation(str)
-                binding.outputView.text = result.toString()
-                binding.inputView.text = ""
+        binding.buttonSin.setOnClickListener {
+            binding.inputView.append("sin")
+        }
+        binding.buttonCos.setOnClickListener {
+            binding.inputView.append("cos")
+        }
+        binding.buttonTan.setOnClickListener {
+            binding.inputView.append("tan")
+        }
+        binding.buttonLn.setOnClickListener {
+            binding.inputView.append("ln")
+        }
+        binding.buttonLog.setOnClickListener {
+            binding.inputView.append("log")
+        }
+        binding.buttonPie.setOnClickListener {
+            binding.inputView.append("3.14159265")
+        }
+        binding.buttonC.setOnClickListener {
+            var str: String = binding.inputView.text.toString()
+            if (str.isEmpty()) {
+                Toast.makeText(this, "Please enter a valid number", Toast.LENGTH_SHORT).show()
+            } else {
+                //dropping the last entered digit
+                str = str.dropLast(1)
+                binding.inputView.text = str
             }
         }
-    }
 
-    private fun calculation(str: String): Double {
 
-        return object : Any() {
-            var position = -1
-            var char = 0
+        binding.buttonEquals.setOnClickListener {
+            val inputString = binding.inputView.text.toString()
 
-            fun nextChar() {
-                //traversing char by char from input string
-                char = if (++position < str.length) {
-                    //using .code in place of .toInt()
-                    str[position].digitToInt()
-                } else -1
-            }
+            // Split the input string into individual characters
+            val inputChars = inputString.toCharArray()
 
-            fun eat(charToEdit: Int): Boolean {
-                //checking extra spacing
-                while (char == Character.MIN_VALUE.digitToInt()) nextChar()
+            // Initialize variables to keep track of the current number and operation
+            var currentNumber = ""
+            var currentOperation = '+'
 
-                if (char == charToEdit) {
-                    nextChar()
-                    return true
-                }
-                return false
-            }
+            // Initialize a list to store the intermediate results
+            val intermediateResults = mutableListOf<Double>()
 
-            fun parse(): Double {
-                nextChar()
-                //get the next operator
-                var x = parseExpression()
-                if (position < str.length) throw java.lang.RuntimeException("Unexpected: " + char.toChar())
-                return x
-            }
-
-            fun parseExpression(): Double {
-                //check for addition or subtraction
-                var x = parseTerm()
-                while (true) {
-                    if (eat('+'.digitToInt())) x += parseTerm()
-                    else if (eat('-'.toInt())) x -= parseTerm()
-                    else return x
-                }
-            }
-
-            fun parseTerm(): Double {
-                //check for parse factor
-                var x = parseFactor()
-                while (true) {
-                    if (eat('*'.digitToInt())) x *= parseFactor()
-                    else if (eat('/'.digitToInt())) x /= parseFactor()
-                    else return x
-                }
-            }
-
-            fun parseFactor(): Double {
-                if (eat('+'.digitToInt())) return parseFactor()
-                if (eat('-'.digitToInt())) return -parseFactor()
-                var x: Double
-                var startPosition = position
-                if (eat('('.digitToInt())) {
-                    x = parseExpression()
-                    eat(')'.digitToInt())
-                } else if (char >= '0'.digitToInt() && char <= '9'.digitToInt() || char == '.'.digitToInt()) {
-                    while (char >= '0'.digitToInt() && char <= '9'.digitToInt() || char == '.'.digitToInt()) nextChar()
-                    x = str.substring(startPosition, position).toDouble()
-
-                } else if (char >= 'a'.digitToInt() && char <= 'z'.digitToInt()) {
-                    while(char >='a'.digitToInt() && char<='z'.digitToInt()) nextChar()
-                    var func = str.substring(startPosition, position)
-                    x = parseFactor()
-
-                    x = when (func) {
-                        "sqrt" -> sqrt(x)
-                        "sin" -> sin(Math.toRadians(x))
-                        "cos" -> cos(Math.toRadians(x))
-                        "tan" -> tan(Math.toRadians(x))
-                        "log" -> log10(x)
-                        "ln" -> ln(x)
-                        else ->
-                            throw  RuntimeException(
-                            "Unknown Exception : $func"
-                        )
+            // Loop through each character in the input string
+            for (char in inputChars) {
+                // If the character is a digit, add it to the current number
+                if (char.isDigit() || char == '.') {
+                    currentNumber += char
+                } else {
+                    // If the character is not a digit, parse the current number and
+                    // apply the current operation to the intermediate results list
+                    val number = currentNumber.toDoubleOrNull() ?: return@setOnClickListener
+                    when (currentOperation) {
+                        '+' -> intermediateResults.add(number)
+                        '-' -> intermediateResults.add(-number)
+                        '*' -> {
+                            val lastIndex = intermediateResults.lastIndex
+                            intermediateResults[lastIndex] = intermediateResults[lastIndex] * number
+                        }
+                        '/' -> {
+                            val lastIndex = intermediateResults.lastIndex
+                            intermediateResults[lastIndex] = intermediateResults[lastIndex] / number
+                        }
                     }
+
+                    // Set the current operation to the new character and reset the current number
+                    currentOperation = char
+                    currentNumber = ""
                 }
-                else {
-                    throw RuntimeException("Unexpected : " + char.toChar())
-                }
-                if(eat('⌃'.toInt())) x = Math.pow(x,parseFactor())
-                return x
             }
-        }.parse()
+
+            // Parse the final number and apply the final operation to the intermediate results list
+            val finalNumber = currentNumber.toDoubleOrNull() ?: return@setOnClickListener
+            when (currentOperation) {
+                '+' -> intermediateResults.add(finalNumber)
+                '-' -> intermediateResults.add(-finalNumber)
+                '*' -> {
+                    val lastIndex = intermediateResults.lastIndex
+                    intermediateResults[lastIndex] = intermediateResults[lastIndex] * finalNumber
+                }
+                '/' -> {
+                    val lastIndex = intermediateResults.lastIndex
+                    intermediateResults[lastIndex] = intermediateResults[lastIndex] / finalNumber
+                }
+            }
+
+            // Compute the final result by summing up the intermediate results
+            val finalResult = intermediateResults.sum()
+
+            // Update the input view to display the final result
+            binding.outputView.setText(finalResult.toString())
+        }
+
+
+//            binding.buttonEquals.setOnClickListener {
+//                var str: String = binding.inputView.text.toString()
+//                var result: Double = calculation(str)
+//                binding.outputView.text = result.toString()
+//                binding.inputView.text = ""
+//            }
+//        }
+//    }
+
+//    private fun calculation(str: String): Double {
+//
+//        return object : Any() {
+//            //variables to track position in str and individual characters (toInt)
+//            var position = -1
+//            var char = 0
+//
+//            fun nextCharacter() {
+//                //traversing char by char in the input string, incrementing position each time moving from left to right
+//                // same sequence as entered by user
+//                char = if (++position < str.length) {
+//                    str[position].code
+//                } else -1
+//            }
+//
+//            fun spacesInExpression(charToEat: Int): Boolean {
+//                //checking <SPACES> in the expression
+//                while (char == "".toInt()) nextCharacter() // or while (char == ' '.toInt()) nextChar()
+//
+//                if (char == charToEat) { //checking character position. if both are equal we return true and go to next Character
+//                    nextCharacter()
+//                    return true
+//                }
+//                return false
+//            }
+//
+//            fun parse(): Double {
+//                //parsing the whole expression to get answer/result by calling parseExpression fun
+//                nextCharacter()
+//                //get the next operator
+//                var parseTheExpression: Double = parseExpression()
+//                if (position < str.length) throw RuntimeException("Unexpected: " + char.toChar())
+//                return parseTheExpression
+//            }
+//
+//            fun parseExpression(): Double {
+//                //check and perform only addition or subtraction
+//                var parser: Double = parseTerm()
+//                while (true) {
+//                    if (spacesInExpression('+'.digitToInt())) parser += parseTerm()
+//                    else if (spacesInExpression('-'.digitToInt())) parser -= parseTerm()
+//                    else return parser
+//                }
+//            }
+//
+//            fun parseTerm(): Double {
+//                //check and perform only mult or div
+//                var parser: Double = parseFactor()
+//                while (true) {
+//                    if (spacesInExpression('*'.digitToInt())) parser *= parseFactor()
+//                    else if (spacesInExpression('/'.digitToInt())) parser /= parseFactor()
+//                    else return parser
+//                }
+//            }
+//
+//            fun parseFactor(): Double {
+//                //checking the factors and eprforming operations
+//                if (spacesInExpression('+'.digitToInt())) return parseFactor()
+//                if (spacesInExpression('-'.digitToInt())) return -parseFactor()
+//
+//                var answer: Double
+//                var startPosition = position
+//                //checking for opening and closing parenthesis
+//                if (spacesInExpression('('.digitToInt())) {
+//                    answer = parseExpression()
+//                    spacesInExpression(')'.digitToInt())
+//                } else if (char >= '0'.digitToInt() && char <= '9'.digitToInt() || char == '.'.digitToInt()) {
+//                    while (char >= '0'.digitToInt() && char <= '9'.digitToInt() || char == '.'.digitToInt()) nextCharacter()
+//                    //getting substring from entered expression string from start to current position
+//                    answer = str.substring(startPosition, position).toDouble()
+//
+//                } else if (char >= 'a'.digitToInt() && char <= 'z'.digitToInt()) {
+//                    //checking for operator in the entered expression
+//                    while (char >= 'a'.digitToInt() && char <= 'z'.digitToInt()) nextCharacter()
+//                    var func = str.substring(startPosition, position)
+//                    answer = parseFactor()
+//
+//                    //checking for operators to perform operation accordingly
+//                    answer = when (func) {
+//                        "sqrt" -> sqrt(answer)
+//                        "sin" -> sin(Math.toRadians(answer))
+//                        "cos" -> cos(Math.toRadians(answer))
+//                        "tan" -> tan(Math.toRadians(answer))
+//                        "log" -> log10(answer)
+//                        "ln" -> ln(answer)
+//                        else ->
+//                            throw RuntimeException(
+//                                "Unknown Exception : $func"
+//                            )
+//                    }
+//                } else {
+//                    throw RuntimeException("Unexpected : " + char.toChar())
+//                }
+//                if(spacesInExpression('⌃'.digitToInt())) answer = answer.pow(parseFactor())
+//                return answer
+//            }
+//            //in the end calling a parse for the expression
+//        }.parse()
+//    }
+
+
+
     }
 
-    private fun factorial(num: Int): Long {
+    fun factorial(num: Int): Long {
         //using recursion function
         return if (num >= 1) {
             return num * factorial(num - 1)
